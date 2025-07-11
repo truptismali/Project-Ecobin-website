@@ -1,0 +1,3258 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EcoBin - Smart Waste Management</title>
+    <style>
+        /* Global Styles */
+        :root {
+            --primary-color: #4CAF50;
+            --secondary-color: #2E7D32;
+            --accent-color: #8BC34A;
+            --light-color: #F1F8E9;
+            --dark-color: #1B5E20;
+            --text-color: #333;
+            --white: #fff;
+            --error-color: #f44336;
+            --warning-color: #FF9800;
+            --info-color: #2196F3;
+            --collector-color: #673AB7;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: var(--light-color);
+            color: var(--text-color);
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+        
+        /* Header & Navigation */
+        header {
+            background-color: var(--primary-color);
+            color: var(--white);
+            padding: 1rem 0;
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 1000;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        
+        nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .logo {
+            font-size: 1.8rem;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+        }
+        
+        .logo i {
+            margin-right: 10px;
+        }
+        
+        .nav-links {
+            display: flex;
+            list-style: none;
+        }
+        
+        .nav-links li {
+            margin-left: 2rem;
+        }
+        
+        .nav-links a {
+            color: var(--white);
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            padding: 0.5rem 0;
+            position: relative;
+        }
+        
+        .nav-links a:hover {
+            opacity: 0.8;
+        }
+        
+        .nav-links a::after {
+            content: '';
+            position: absolute;
+            width: 0;
+            height: 2px;
+            background: var(--white);
+            bottom: 0;
+            left: 0;
+            transition: width 0.3s ease;
+        }
+        
+        .nav-links a:hover::after {
+            width: 100%;
+        }
+        
+        .login-btn {
+            background-color: var(--white);
+            color: var(--primary-color);
+            padding: 0.5rem 1.5rem;
+            border-radius: 30px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            text-decoration: none;
+        }
+        
+        .login-btn:hover {
+            background-color: var(--light-color);
+            transform: translateY(-2px);
+        }
+        
+        .collector-btn {
+            background-color: var(--collector-color);
+            color: var(--white);
+            padding: 0.5rem 1.5rem;
+            border-radius: 30px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            margin-left: 1rem;
+        }
+        
+        .collector-btn:hover {
+            background-color: #5E35B1;
+            transform: translateY(-2px);
+        }
+        
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 2000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+            overflow: auto;
+        }
+        
+        .modal-content {
+            background-color: var(--white);
+            margin: 10% auto;
+            padding: 2rem;
+            border-radius: 10px;
+            width: 90%;
+            max-width: 500px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            animation: modalopen 0.3s;
+        }
+        
+        @keyframes modalopen {
+            from {opacity: 0; transform: translateY(-50px);}
+            to {opacity: 1; transform: translateY(0);}
+        }
+        
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 1.5rem;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        
+        .close:hover {
+            color: var(--text-color);
+        }
+        
+        .modal-title {
+            font-size: 1.8rem;
+            margin-bottom: 1.5rem;
+            color: var(--dark-color);
+            text-align: center;
+        }
+        
+        .form-group {
+            margin-bottom: 1.5rem;
+            position: relative;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+        }
+        
+        .form-group input, .form-group select {
+            width: 100%;
+            padding: 0.8rem;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 1rem;
+        }
+        
+        .password-input-container {
+            position: relative;
+        }
+        
+        .toggle-password {
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            cursor: pointer;
+            color: #666;
+        }
+        
+        .password-strength {
+            margin-top: 0.5rem;
+            height: 5px;
+            background-color: #eee;
+            border-radius: 5px;
+            overflow: hidden;
+        }
+        
+        .password-strength-bar {
+            height: 100%;
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+        
+        .password-requirements {
+            margin-top: 0.5rem;
+            font-size: 0.8rem;
+            color: #666;
+        }
+        
+        .password-requirements li {
+            margin-left: 1.2rem;
+            margin-bottom: 0.2rem;
+        }
+        
+        .submit-btn {
+            background-color: var(--primary-color);
+            color: var(--white);
+            border: none;
+            padding: 0.8rem 1.5rem;
+            border-radius: 5px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 100%;
+        }
+        
+        .submit-btn:hover {
+            background-color: var(--secondary-color);
+        }
+        
+        .collector-submit-btn {
+            background-color: var(--collector-color);
+        }
+        
+        .collector-submit-btn:hover {
+            background-color: #5E35B1;
+        }
+        
+        .form-footer {
+            text-align: center;
+            margin-top: 1.5rem;
+        }
+        
+        .form-footer a {
+            color: var(--primary-color);
+            text-decoration: none;
+        }
+        
+        .form-footer a:hover {
+            text-decoration: underline;
+        }
+        
+        .error-message {
+            color: var(--error-color);
+            font-size: 0.9rem;
+            margin-top: 0.5rem;
+            display: none;
+        }
+        
+        /* Hero Section */
+        .hero {
+            height: 100vh;
+            background: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), url('home.jpg');
+            background-size: cover;
+            background-position: center;
+            display: flex;
+            align-items: center;
+            text-align: center;
+            color: var(--white);
+            padding-top: 80px;
+        }
+        
+        .hero-content {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        .hero h1 {
+            font-size: 3.5rem;
+            margin-bottom: 1rem;
+            text-shadow: 2px 2px 5px rgba(0,0,0,0.5);
+        }
+        
+        .hero p {
+            font-size: 1.2rem;
+            margin-bottom: 2rem;
+            text-shadow: 1px 1px 3px rgba(0,0,0,0.5);
+        }
+        
+        .cta-btn {
+            display: inline-block;
+            background-color: var(--primary-color);
+            color: var(--white);
+            padding: 0.8rem 2rem;
+            border-radius: 30px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 1.1rem;
+            transition: all 0.3s ease;
+            border: 2px solid var(--primary-color);
+        }
+        
+        .cta-btn:hover {
+            background-color: transparent;
+            border-color: var(--white);
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+        }
+        
+        /* About Section */
+        .about {
+            padding: 5rem 0;
+            background-color: var(--white);
+        }
+        
+        .section-title {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+        
+        .section-title h2 {
+            font-size: 2.5rem;
+            color: var(--dark-color);
+            margin-bottom: 1rem;
+        }
+        
+        .section-title p {
+            font-size: 1.1rem;
+            color: #666;
+            max-width: 700px;
+            margin: 0 auto;
+        }
+        
+        .about-content {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+        }
+        
+        .about-text {
+            flex: 1;
+            min-width: 300px;
+            padding-right: 2rem;
+        }
+        
+        .about-text h3 {
+            font-size: 1.8rem;
+            color: var(--dark-color);
+            margin-bottom: 1.5rem;
+        }
+        
+        .about-text p {
+            margin-bottom: 1.5rem;
+            font-size: 1.1rem;
+        }
+        
+        .about-image {
+            flex: 1;
+            min-width: 300px;
+            text-align: center;
+        }
+        
+        .about-image img {
+            max-width: 100%;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        
+        /* Features Section */
+        .features {
+            padding: 5rem 0;
+            background-color: var(--light-color);
+        }
+        
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-top: 3rem;
+        }
+        
+        .feature-card {
+            background-color: var(--white);
+            border-radius: 10px;
+            padding: 2rem;
+            text-align: center;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+            transition: all 0.3s ease;
+        }
+        
+        .feature-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 15px 30px rgba(0,0,0,0.1);
+        }
+        
+        .feature-icon {
+            font-size: 3rem;
+            color: var(--primary-color);
+            margin-bottom: 1.5rem;
+        }
+        
+        .feature-card h3 {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            color: var(--dark-color);
+        }
+        
+        .feature-card p {
+            color: #666;
+        }
+        
+        /* Waste Detection Section */
+        .waste-detection {
+            padding: 5rem 0;
+            background-color: var(--white);
+        }
+        
+        .detection-container {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: space-between;
+            margin-top: 3rem;
+        }
+        
+        .detection-content {
+            flex: 1;
+            min-width: 300px;
+            padding-right: 2rem;
+        }
+        
+        .detection-steps {
+            margin-bottom: 2rem;
+        }
+        
+        .step {
+            display: flex;
+            margin-bottom: 1.5rem;
+        }
+        
+        .step-number {
+            background-color: var(--primary-color);
+            color: var(--white);
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 1rem;
+            flex-shrink: 0;
+        }
+        
+        .step-content h4 {
+            font-size: 1.2rem;
+            margin-bottom: 0.5rem;
+            color: var(--dark-color);
+        }
+        
+        .detection-interface {
+            flex: 1;
+            min-width: 300px;
+            background-color: var(--light-color);
+            padding: 2rem;
+            border-radius: 10px;
+            text-align: center;
+        }
+        
+        .camera-preview {
+            width: 100%;
+            height: 300px;
+            background-color: #ddd;
+            border-radius: 5px;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .camera-preview video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .camera-preview canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+        
+        .capture-btn {
+            background-color: var(--primary-color);
+            color: var(--white);
+            border: none;
+            padding: 0.8rem 1.5rem;
+            border-radius: 5px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-right: 1rem;
+        }
+        
+        .capture-btn:hover {
+            background-color: var(--secondary-color);
+        }
+        
+        .upload-btn {
+            background-color: var(--accent-color);
+            color: var(--text-color);
+            border: none;
+            padding: 0.8rem 1.5rem;
+            border-radius: 5px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .upload-btn:hover {
+            background-color: #7CB342;
+        }
+        
+        .result-display {
+            margin-top: 2rem;
+            text-align: left;
+        }
+        
+        .result-display h4 {
+            font-size: 1.2rem;
+            margin-bottom: 1rem;
+            color: var(--dark-color);
+        }
+        
+        .waste-type {
+            font-weight: bold;
+            color: var(--secondary-color);
+        }
+        
+        .disposal-steps {
+            margin-top: 1rem;
+            padding-left: 1.5rem;
+        }
+        
+        .request-collection-btn {
+            background-color: var(--info-color);
+            color: var(--white);
+            border: none;
+            padding: 0.8rem 1.5rem;
+            border-radius: 5px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 1rem;
+            width: 100%;
+            display: none;
+        }
+        
+        .request-collection-btn:hover {
+            background-color: #1976D2;
+        }
+        
+        .collection-status {
+            margin-top: 1rem;
+            padding: 1rem;
+            border-radius: 5px;
+            background-color: #f5f5f5;
+            display: none;
+        }
+        
+        .status-pending {
+            background-color: #FFF3E0;
+            color: var(--warning-color);
+        }
+        
+        .status-approved {
+            background-color: #E8F5E9;
+            color: var(--secondary-color);
+        }
+        
+        .status-completed {
+            background-color: #E3F2FD;
+            color: var(--info-color);
+        }
+        
+        /* Waste Categories Section */
+        .waste-categories {
+            padding: 5rem 0;
+            background-color: var(--light-color);
+        }
+        
+        .categories-container {
+            margin-top: 3rem;
+        }
+        
+        .category-tabs {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+        }
+        
+        .tab-btn {
+            padding: 0.8rem 1.5rem;
+            background-color: var(--white);
+            border: none;
+            border-radius: 30px;
+            margin: 0 0.5rem 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 500;
+        }
+        
+        .tab-btn.active {
+            background-color: var(--primary-color);
+            color: var(--white);
+        }
+        
+        .tab-btn:hover:not(.active) {
+            background-color: #e0e0e0;
+        }
+        
+        .category-content {
+            display: none;
+        }
+        
+        .category-content.active {
+            display: block;
+        }
+        
+        .subcategories {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+        }
+        
+        .subcategory-card {
+            background-color: var(--white);
+            border-radius: 10px;
+            padding: 1.5rem;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+        }
+        
+        .subcategory-card h4 {
+            font-size: 1.2rem;
+            color: var(--dark-color);
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+        }
+        
+        .subcategory-card h4 i {
+            margin-right: 10px;
+            color: var(--primary-color);
+        }
+        
+        .disposal-method {
+            margin-top: 1rem;
+        }
+        
+        .disposal-method h5 {
+            font-size: 1rem;
+            margin-bottom: 0.5rem;
+            color: var(--secondary-color);
+        }
+        
+        /* Dashboard Section */
+        .dashboard {
+            padding: 5rem 0;
+            background-color: var(--white);
+        }
+        
+        .dashboard-container {
+            margin-top: 3rem;
+            background-color: var(--light-color);
+            border-radius: 10px;
+            padding: 2rem;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+        }
+        
+        .welcome-message {
+            font-size: 1.5rem;
+            margin-bottom: 2rem;
+            color: var(--dark-color);
+            text-align: center;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        
+        .stat-card {
+            background-color: var(--white);
+            border-radius: 10px;
+            padding: 1.5rem;
+            text-align: center;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+        }
+        
+        .stat-card h4 {
+            font-size: 1.1rem;
+            margin-bottom: 1rem;
+            color: var(--dark-color);
+        }
+        
+        .stat-value {
+            font-size: 2rem;
+            font-weight: bold;
+            color: var(--primary-color);
+        }
+        
+        .charts {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 1.5rem;
+            margin-top: 2rem;
+        }
+        
+        .chart-container {
+            background-color: var(--white);
+            border-radius: 10px;
+            padding: 1.5rem;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+        }
+        
+        .chart-container h4 {
+            font-size: 1.2rem;
+            margin-bottom: 1.5rem;
+            color: var(--dark-color);
+            text-align: center;
+        }
+        
+        .chart {
+            width: 100%;
+            height: 300px;
+            background-color: #f9f9f9;
+            border-radius: 5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #666;
+        }
+        
+        .waste-input {
+            margin-top: 3rem;
+        }
+        
+        .input-form {
+            background-color: var(--white);
+            border-radius: 10px;
+            padding: 2rem;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+        }
+        
+        .input-form h4 {
+            font-size: 1.3rem;
+            margin-bottom: 1.5rem;
+            color: var(--dark-color);
+        }
+        
+        .form-group select {
+            width: 100%;
+            padding: 0.8rem;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 1rem;
+        }
+        
+        /* Collection Requests Section */
+        .collection-requests {
+            margin-top: 3rem;
+        }
+        
+        .requests-list {
+            margin-top: 1.5rem;
+        }
+        
+        .request-card {
+            background-color: var(--white);
+            border-radius: 10px;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .request-info h5 {
+            font-size: 1.1rem;
+            margin-bottom: 0.5rem;
+            color: var(--dark-color);
+        }
+        
+        .request-info p {
+            color: #666;
+            font-size: 0.9rem;
+        }
+        
+        .request-status {
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+        
+        .status-pending {
+            background-color: #FFF3E0;
+            color: var(--warning-color);
+        }
+        
+        .status-approved {
+            background-color: #E8F5E9;
+            color: var(--secondary-color);
+        }
+        
+        .status-completed {
+            background-color: #E3F2FD;
+            color: var(--info-color);
+        }
+        
+        /* Collector Dashboard */
+        .collector-dashboard {
+            padding: 5rem 0;
+            background-color: var(--light-color);
+        }
+        
+        .collector-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        
+        .collector-stat-card {
+            background-color: var(--white);
+            border-radius: 10px;
+            padding: 1.5rem;
+            text-align: center;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+        }
+        
+        .collector-stat-card h4 {
+            font-size: 1.1rem;
+            margin-bottom: 1rem;
+            color: var(--dark-color);
+        }
+        
+        .collector-stat-value {
+            font-size: 2rem;
+            font-weight: bold;
+            color: var(--collector-color);
+        }
+        
+        .collector-actions {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+        
+        .action-btn {
+            padding: 0.5rem 1rem;
+            border-radius: 5px;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: none;
+        }
+        
+        .approve-btn {
+            background-color: var(--primary-color);
+            color: white;
+        }
+        
+        .approve-btn:hover {
+            background-color: var(--secondary-color);
+        }
+        
+        .reject-btn {
+            background-color: var(--error-color);
+            color: white;
+        }
+        
+        .reject-btn:hover {
+            background-color: #D32F2F;
+        }
+        
+        .complete-btn {
+            background-color: var(--info-color);
+            color: white;
+        }
+        
+        .complete-btn:hover {
+            background-color: #1976D2;
+        }
+        
+        /* Feedback Section */
+        .feedback {
+            padding: 5rem 0;
+            background-color: var(--light-color);
+        }
+        
+        .feedback-container {
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: var(--white);
+            border-radius: 10px;
+            padding: 2rem;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+        }
+        
+        .feedback-form h3 {
+            font-size: 1.8rem;
+            margin-bottom: 1.5rem;
+            color: var(--dark-color);
+            text-align: center;
+        }
+        
+        .form-row {
+            display: flex;
+            gap: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .form-col {
+            flex: 1;
+        }
+        
+        textarea {
+            width: 100%;
+            padding: 0.8rem;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 1rem;
+            min-height: 150px;
+            resize: vertical;
+        }
+        
+        /* Footer */
+        footer {
+            background-color: var(--dark-color);
+            color: var(--white);
+            padding: 3rem 0 1rem;
+        }
+        
+        .footer-content {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            margin-bottom: 2rem;
+        }
+        
+        .footer-col {
+            flex: 1;
+            min-width: 250px;
+            margin-bottom: 1.5rem;
+        }
+        
+        .footer-col h4 {
+            font-size: 1.3rem;
+            margin-bottom: 1.5rem;
+            position: relative;
+        }
+        
+        .footer-col h4::after {
+            content: '';
+            position: absolute;
+            left: 0;
+            bottom: -8px;
+            width: 50px;
+            height: 2px;
+            background-color: var(--accent-color);
+        }
+        
+        .footer-col p {
+            margin-bottom: 1rem;
+        }
+        
+        .footer-links {
+            list-style: none;
+        }
+        
+        .footer-links li {
+            margin-bottom: 0.8rem;
+        }
+        
+        .footer-links a {
+            color: #ccc;
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+        
+        .footer-links a:hover {
+            color: var(--white);
+            padding-left: 5px;
+        }
+        
+        .social-links {
+            display: flex;
+            gap: 1rem;
+        }
+        
+        .social-links a {
+            display: inline-block;
+            width: 40px;
+            height: 40px;
+            background-color: rgba(255,255,255,0.1);
+            border-radius: 50%;
+            color: var(--white);
+            text-align: center;
+            line-height: 40px;
+            transition: all 0.3s ease;
+        }
+        
+        .social-links a:hover {
+            background-color: var(--accent-color);
+            transform: translateY(-3px);
+        }
+        
+        .footer-bottom {
+            text-align: center;
+            padding-top: 1.5rem;
+            border-top: 1px solid rgba(255,255,255,0.1);
+        }
+        
+        /* Notifications */
+        .notification {
+            position: fixed;
+            top: 100px;
+            right: 20px;
+            padding: 1rem 1.5rem;
+            border-radius: 5px;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.2);
+            z-index: 3000;
+            display: flex;
+            align-items: center;
+            transform: translateX(120%);
+            transition: transform 0.3s ease;
+        }
+        
+        .notification.show {
+            transform: translateX(0);
+        }
+        
+        .notification.success {
+            background-color: #E8F5E9;
+            color: var(--secondary-color);
+            border-left: 5px solid var(--secondary-color);
+        }
+        
+        .notification.error {
+            background-color: #FFEBEE;
+            color: var(--error-color);
+            border-left: 5px solid var(--error-color);
+        }
+        
+        .notification.info {
+            background-color: #E3F2FD;
+            color: var(--info-color);
+            border-left: 5px solid var(--info-color);
+        }
+        
+        .notification.warning {
+            background-color: #FFF3E0;
+            color: var(--warning-color);
+            border-left: 5px solid var(--warning-color);
+        }
+        
+        .notification-icon {
+            margin-right: 1rem;
+            font-size: 1.5rem;
+        }
+        
+        .notification-close {
+            margin-left: 1rem;
+            cursor: pointer;
+        }
+        
+        /* Camera Access Prompt */
+        .camera-permission-prompt {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.8);
+            z-index: 4000;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            text-align: center;
+            padding: 20px;
+        }
+        
+        .camera-permission-prompt h3 {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+        }
+        
+        .camera-permission-prompt p {
+            margin-bottom: 2rem;
+            max-width: 500px;
+        }
+        
+        .permission-buttons {
+            display: flex;
+            gap: 1rem;
+        }
+        
+        .permission-btn {
+            padding: 0.8rem 1.5rem;
+            border-radius: 5px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .permission-btn.allow {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+        }
+        
+        .permission-btn.deny {
+            background-color: #f44336;
+            color: white;
+            border: none;
+        }
+        
+        /* Responsive Styles */
+        @media (max-width: 768px) {
+            .nav-links {
+                display: none;
+            }
+            
+            .hero h1 {
+                font-size: 2.5rem;
+            }
+            
+            .about-content, .detection-container {
+                flex-direction: column;
+            }
+            
+            .about-text {
+                padding-right: 0;
+                margin-bottom: 2rem;
+            }
+            
+            .form-row {
+                flex-direction: column;
+                gap: 0;
+            }
+            
+            .request-card {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            
+            .request-status {
+                margin-top: 1rem;
+                align-self: flex-end;
+            }
+            
+            .permission-buttons {
+                flex-direction: column;
+                width: 100%;
+                max-width: 300px;
+            }
+            
+            .permission-btn {
+                width: 100%;
+            }
+            
+            .collector-actions {
+                flex-direction: column;
+            }
+            
+            .action-btn {
+                width: 100%;
+            }
+        }
+    </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+<body>
+    <!-- Header & Navigation -->
+    <header>
+        <div class="container">
+            <nav>
+                <div class="logo">
+                    <i class="fas fa-recycle"></i>
+                    <span>EcoBin</span>
+                </div>
+                <ul class="nav-links">
+                    <li><a href="#home">Home</a></li>
+                    <li><a href="#about">About</a></li>
+                    <li><a href="#dashboard">Dashboard</a></li>
+                    <li><a href="#detection">Waste Detection</a></li>
+                    <li><a href="#categories">Waste Categories</a></li>
+                    <li><a href="#feedback">Feedback</a></li>
+                </ul>
+                <a href="#" class="login-btn" id="loginBtn">Login</a>
+                <a href="#" class="collector-btn" id="collectorBtn">Collector Login</a>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Login Modal -->
+    <div id="loginModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2 class="modal-title">Login</h2>
+            <form id="loginForm">
+                <div class="form-group">
+                    <label for="loginEmail">Email</label>
+                    <input type="email" id="loginEmail" required>
+                    <div class="error-message" id="loginEmailError">Please enter a valid email</div>
+                </div>
+                <div class="form-group">
+                    <label for="loginPassword">Password</label>
+                    <div class="password-input-container">
+                        <input type="password" id="loginPassword" required>
+                        <i class="fas fa-eye toggle-password" id="toggleLoginPassword"></i>
+                    </div>
+                    <div class="error-message" id="loginPasswordError">Password must be at least 6 characters</div>
+                </div>
+                <button type="submit" class="submit-btn">Login</button>
+                <div class="form-footer">
+                    Don't have an account? <a href="#" id="showRegister">Register</a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Collector Login Modal -->
+    <div id="collectorLoginModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2 class="modal-title">Collector Login</h2>
+            <form id="collectorLoginForm">
+                <div class="form-group">
+                    <label for="collectorLoginEmail">Email</label>
+                    <input type="email" id="collectorLoginEmail" required>
+                    <div class="error-message" id="collectorLoginEmailError">Please enter a valid email</div>
+                </div>
+                <div class="form-group">
+                    <label for="collectorLoginPassword">Password</label>
+                    <div class="password-input-container">
+                        <input type="password" id="collectorLoginPassword" required>
+                        <i class="fas fa-eye toggle-password" id="toggleCollectorLoginPassword"></i>
+                    </div>
+                    <div class="error-message" id="collectorLoginPasswordError">Password must be at least 6 characters</div>
+                </div>
+                <button type="submit" class="submit-btn collector-submit-btn">Login</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Register Modal -->
+    <div id="registerModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2 class="modal-title">Register</h2>
+            <form id="registerForm">
+                <div class="form-group">
+                    <label for="registerName">Full Name</label>
+                    <input type="text" id="registerName" required>
+                    <div class="error-message" id="registerNameError">Please enter your name</div>
+                </div>
+                <div class="form-group">
+                    <label for="registerEmail">Email</label>
+                    <input type="email" id="registerEmail" required>
+                    <div class="error-message" id="registerEmailError">Please enter a valid email</div>
+                </div>
+                <div class="form-group">
+                    <label for="registerPassword">Password</label>
+                    <div class="password-input-container">
+                        <input type="password" id="registerPassword" required>
+                        <i class="fas fa-eye toggle-password" id="toggleRegisterPassword"></i>
+                    </div>
+                    <div class="password-strength">
+                        <div class="password-strength-bar" id="passwordStrengthBar"></div>
+                    </div>
+                    <div class="password-requirements">
+                        <p>Password must:</p>
+                        <ul>
+                            <li id="lengthReq">Be at least 8 characters long</li>
+                            <li id="uppercaseReq">Contain at least one uppercase letter</li>
+                            <li id="lowercaseReq">Contain at least one lowercase letter</li>
+                            <li id="numberReq">Contain at least one number</li>
+                            <li id="specialReq">Contain at least one special character</li>
+                        </ul>
+                    </div>
+                    <div class="error-message" id="registerPasswordError">Please enter a valid password</div>
+                </div>
+                <div class="form-group">
+                    <label for="registerConfirmPassword">Confirm Password</label>
+                    <div class="password-input-container">
+                        <input type="password" id="registerConfirmPassword" required>
+                        <i class="fas fa-eye toggle-password" id="toggleConfirmPassword"></i>
+                    </div>
+                    <div class="error-message" id="registerConfirmPasswordError">Passwords do not match</div>
+                </div>
+                <div class="form-group">
+                    <label for="registerAddress">Address</label>
+                    <input type="text" id="registerAddress" required>
+                    <div class="error-message" id="registerAddressError">Please enter your address</div>
+                </div>
+                <div class="form-group">
+                    <label for="registerPhone">Phone Number</label>
+                    <input type="tel" id="registerPhone" required maxlength="10" pattern="[0-9]{10}">
+                    <div class="error-message" id="registerPhoneError">Please enter a valid 10-digit phone number</div>
+                </div>
+                <button type="submit" class="submit-btn">Register</button>
+                <div class="form-footer">
+                    Already have an account? <a href="#" id="showLogin">Login</a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Hero Section -->
+    <section class="hero" id="home">
+        <div class="hero-content">
+            <h1>Smart Waste Management System</h1>
+            <p>Revolutionizing waste disposal with AI-powered categorization and eco-friendly solutions for a cleaner planet.</p>
+            <a href="#detection" class="cta-btn">Try Waste Detection</a>
+        </div>
+    </section>
+
+    <!-- About Section -->
+    <section class="about" id="about">
+        <div class="container">
+            <div class="section-title">
+                <h2>About EcoBin</h2>
+                <p>EcoBin is an innovative waste management platform that leverages technology to promote proper waste disposal and recycling practices.</p>
+            </div>
+            <div class="about-content">
+                <div class="about-text">
+                    <h3>Our Mission</h3>
+                    <p>EcoBin was created with the vision of reducing environmental pollution through smart waste management. Our platform helps individuals and organizations properly categorize and dispose of waste materials.</p>
+                    <p>By combining computer vision technology with comprehensive waste disposal knowledge, we make it easy for anyone to contribute to a cleaner environment.</p>
+                    <p>Our system not only identifies waste types but also provides detailed instructions on how to dispose of or recycle each item properly, helping to reduce landfill waste and promote sustainability.</p>
+                </div>
+                <div class="about-image">
+                    <img src="mission.jpg" alt="Waste Management">
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="features">
+        <div class="container">
+            <div class="section-title">
+                <h2>Key Features</h2>
+                <p>Discover how EcoBin can help you manage waste more effectively</p>
+            </div>
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-chart-pie"></i>
+                    </div>
+                    <h3>Smart Dashboard</h3>
+                    <p>Track your waste management statistics with interactive charts and visualizations to analyze your environmental impact.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-camera"></i>
+                    </div>
+                    <h3>Waste Detection</h3>
+                    <p>Use your camera to identify waste types instantly and get proper disposal instructions tailored to your location.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-calendar-check"></i>
+                    </div>
+                    <h3>Collection Requests</h3>
+                    <p>Schedule waste collection with local garbage collectors and track the status of your requests in real-time.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Waste Detection Section -->
+    <section class="waste-detection" id="detection">
+        <div class="container">
+            <div class="section-title">
+                <h2>Waste Detection</h2>
+                <p>Use our AI-powered system to identify waste and get proper disposal instructions</p>
+            </div>
+            <div class="detection-container">
+                <div class="detection-content">
+                    <h3>How It Works</h3>
+                    <div class="detection-steps">
+                        <div class="step">
+                            <div class="step-number">1</div>
+                            <div class="step-content">
+                                <h4>Capture or Upload</h4>
+                                <p>Use your device camera to capture waste items or upload an existing photo from your gallery.</p>
+                            </div>
+                        </div>
+                        <div class="step">
+                            <div class="step-number">2</div>
+                            <div class="step-content">
+                                <h4>AI Analysis</h4>
+                                <p>Our system will analyze the image and categorize the waste material using advanced computer vision.</p>
+                            </div>
+                        </div>
+                        <div class="step">
+                            <div class="step-number">3</div>
+                            <div class="step-content">
+                                <h4>Get Instructions</h4>
+                                <p>Receive detailed disposal instructions tailored to your location and the specific waste type.</p>
+                            </div>
+                        </div>
+                        <div class="step">
+                            <div class="step-number">4</div>
+                            <div class="step-content">
+                                <h4>Request Collection</h4>
+                                <p>Optionally request garbage collection from local collectors with your detected waste type.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="detection-interface">
+                    <div class="camera-preview" id="cameraPreview">
+                        <i class="fas fa-camera" style="font-size: 3rem; color: #666;"></i>
+                    </div>
+                    <button class="capture-btn" id="captureBtn">Open Camera</button>
+                    <button class="upload-btn" id="uploadBtn">Upload Image</button>
+                    <input type="file" id="fileInput" accept="image/*" style="display: none;">
+                    <div class="result-display" id="resultDisplay" style="display: none;">
+                        <h4>Detection Result:</h4>
+                        <p>Waste Type: <span class="waste-type" id="wasteType">Plastic Bottle</span></p>
+                        <div class="disposal-steps" id="disposalSteps">
+                            <h5>Disposal Instructions:</h5>
+                            <ol>
+                                <li>Rinse the bottle to remove any residue</li>
+                                <li>Remove the cap and separate it (often different recycling)</li>
+                                <li>Check local recycling guidelines for plastic types</li>
+                                <li>Place in recycling bin or take to recycling center</li>
+                            </ol>
+                        </div>
+                        <button class="request-collection-btn" id="requestCollectionBtn">Request Collection</button>
+                        <div class="collection-status" id="collectionStatus">
+                            <h5>Collection Status:</h5>
+                            <p id="statusMessage">Your collection request has been submitted.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Waste Categories Section -->
+    <section class="waste-categories" id="categories">
+        <div class="container">
+            <div class="section-title">
+                <h2>Waste Categories</h2>
+                <p>Learn how to properly dispose of different types of waste</p>
+            </div>
+            <div class="categories-container">
+                <div class="category-tabs">
+                    <button class="tab-btn active" data-category="dry">Dry Waste</button>
+                    <button class="tab-btn" data-category="wet">Wet Waste</button>
+                    <button class="tab-btn" data-category="hazardous">Hazardous Waste</button>
+                    <button class="tab-btn" data-category="e-waste">E-Waste</button>
+                    <button class="tab-btn" data-category="medical">Medical Waste</button>
+                </div>
+                
+                <!-- Dry Waste -->
+                <div class="category-content active" id="dry-content">
+                    <div class="subcategories">
+                        <div class="subcategory-card">
+                            <h4><i class="fas fa-wine-bottle"></i> Plastic</h4>
+                            <p>Includes bottles, containers, packaging, bags, and other plastic products.</p>
+                            <div class="disposal-method">
+                                <h5>Disposal Method:</h5>
+                                <ul>
+                                    <li>Rinse and clean plastic items</li>
+                                    <li>Check recycling symbols (1-7) for specific guidelines</li>
+                                    <li>Flatten containers to save space</li>
+                                    <li>Place in recycling bin or take to recycling center</li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="subcategory-card">
+                            <h4><i class="fas fa-newspaper"></i> Paper</h4>
+                            <p>Includes newspapers, magazines, cardboard, office paper, and packaging.</p>
+                            <div class="disposal-method">
+                                <h5>Disposal Method:</h5>
+                                <ul>
+                                    <li>Keep paper dry and clean</li>
+                                    <li>Remove any non-paper components (plastic windows, staples)</li>
+                                    <li>Flatten cardboard boxes</li>
+                                    <li>Place in paper recycling bin</li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="subcategory-card">
+                            <h4><i class="fas fa-beer"></i> Glass</h4>
+                            <p>Includes bottles, jars, and other glass containers.</p>
+                            <div class="disposal-method">
+                                <h5>Disposal Method:</h5>
+                                <ul>
+                                    <li>Rinse thoroughly to remove residue</li>
+                                    <li>Remove lids and caps (often different material)</li>
+                                    <li>Separate by color if required by local facility</li>
+                                    <li>Place in glass recycling bin or take to collection point</li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="subcategory-card">
+                            <h4><i class="fas fa-cube"></i> Metal</h4>
+                            <p>Includes aluminum cans, tin cans, foil, and other metal items.</p>
+                            <div class="disposal-method">
+                                <h5>Disposal Method:</h5>
+                                <ul>
+                                    <li>Rinse cans to remove food residue</li>
+                                    <li>Flatten aluminum cans if possible</li>
+                                    <li>Remove paper labels from cans</li>
+                                    <li>Place in metal recycling bin</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Wet Waste -->
+                <div class="category-content" id="wet-content">
+                    <div class="subcategories">
+                        <div class="subcategory-card">
+                            <h4><i class="fas fa-apple-alt"></i> Food Scraps</h4>
+                            <p>Includes fruit and vegetable peels, leftover food, eggshells, etc.</p>
+                            <div class="disposal-method">
+                                <h5>Disposal Method:</h5>
+                                <ul>
+                                    <li>Collect in a compost bin or container</li>
+                                    <li>Avoid mixing with non-biodegradable items</li>
+                                    <li>Use for home composting if possible</li>
+                                    <li>Otherwise dispose in municipal organic waste bin</li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="subcategory-card">
+                            <h4><i class="fas fa-coffee"></i> Coffee Grounds & Tea Leaves</h4>
+                            <p>Used coffee grounds, tea bags, and tea leaves.</p>
+                            <div class="disposal-method">
+                                <h5>Disposal Method:</h5>
+                                <ul>
+                                    <li>Excellent for composting</li>
+                                    <li>Can be added directly to garden soil</li>
+                                    <li>Remove staples from tea bags if present</li>
+                                    <li>Mix with other organic waste</li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="subcategory-card">
+                            <h4><i class="fas fa-leaf"></i> Yard Waste</h4>
+                            <p>Includes grass clippings, leaves, small branches, and plant trimmings.</p>
+                            <div class="disposal-method">
+                                <h5>Disposal Method:</h5>
+                                <ul>
+                                    <li>Ideal for composting</li>
+                                    <li>Can be used as mulch in gardens</li>
+                                    <li>Check local regulations for curbside pickup</li>
+                                    <li>Avoid mixing with treated wood or diseased plants</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Hazardous Waste -->
+                <div class="category-content" id="hazardous-content">
+                    <div class="subcategories">
+                        <div class="subcategory-card">
+                            <h4><i class="fas fa-spray-can"></i> Chemicals</h4>
+                            <p>Includes household cleaners, pesticides, paints, and solvents.</p>
+                            <div class="disposal-method">
+                                <h5>Disposal Method:</h5>
+                                <ul>
+                                    <li>Never pour down drains or toilets</li>
+                                    <li>Keep in original containers with labels</li>
+                                    <li>Take to hazardous waste collection facility</li>
+                                    <li>Check for community collection events</li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="subcategory-card">
+                            <h4><i class="fas fa-battery-full"></i> Batteries</h4>
+                            <p>Includes all types of household batteries (AA, AAA, button cells, etc.).</p>
+                            <div class="disposal-method">
+                                <h5>Disposal Method:</h5>
+                                <ul>
+                                    <li>Do not throw in regular trash</li>
+                                    <li>Store in non-metal container until disposal</li>
+                                    <li>Take to battery recycling drop-off points</li>
+                                    <li>Many electronics stores accept batteries</li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="subcategory-card">
+                            <h4><i class="fas fa-lightbulb"></i> Light Bulbs</h4>
+                            <p>Includes CFLs, LEDs, fluorescent tubes, and other special bulbs.</p>
+                            <div class="disposal-method">
+                                <h5>Disposal Method:</h5>
+                                <ul>
+                                    <li>Handle broken bulbs carefully (wear gloves)</li>
+                                    <li>Place in sealed container if broken</li>
+                                    <li>Take to special recycling centers</li>
+                                    <li>Some hardware stores accept used bulbs</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- E-Waste -->
+                <div class="category-content" id="e-waste-content">
+                    <div class="subcategories">
+                        <div class="subcategory-card">
+                            <h4><i class="fas fa-mobile-alt"></i> Small Electronics</h4>
+                            <p>Includes phones, tablets, small appliances, and accessories.</p>
+                            <div class="disposal-method">
+                                <h5>Disposal Method:</h5>
+                                <ul>
+                                    <li>Remove batteries if possible</li>
+                                    <li>Wipe personal data from devices</li>
+                                    <li>Take to e-waste recycling centers</li>
+                                    <li>Many retailers offer trade-in or recycling programs</li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="subcategory-card">
+                            <h4><i class="fas fa-laptop"></i> Large Electronics</h4>
+                            <p>Includes computers, TVs, monitors, and large appliances.</p>
+                            <div class="disposal-method">
+                                <h5>Disposal Method:</h5>
+                                <ul>
+                                    <li>Check for manufacturer take-back programs</li>
+                                    <li>Many cities offer bulk e-waste pickup</li>
+                                    <li>Remove hard drives and destroy data</li>
+                                    <li>Take to certified e-waste recyclers</li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="subcategory-card">
+                            <h4><i class="fas fa-plug"></i> Cables & Accessories</h4>
+                            <p>Includes chargers, cables, keyboards, and peripherals.</p>
+                            <div class="disposal-method">
+                                <h5>Disposal Method:</h5>
+                                <ul>
+                                    <li>Donate if still functional</li>
+                                    <li>Many electronics stores accept for recycling</li>
+                                    <li>Do not throw in regular trash</li>
+                                    <li>Bundle cables to prevent tangling</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Medical Waste -->
+                <div class="category-content" id="medical-content">
+                    <div class="subcategories">
+                        <div class="subcategory-card">
+                            <h4><i class="fas fa-syringe"></i> Sharps</h4>
+                            <p>Includes needles, syringes, lancets, and other sharp medical items.</p>
+                            <div class="disposal-method">
+                                <h5>Disposal Method:</h5>
+                                <ul>
+                                    <li>Place in FDA-cleared sharps container</li>
+                                    <li>Never throw loose in trash or recycling</li>
+                                    <li>Take to designated collection sites</li>
+                                    <li>Some pharmacies accept sharps</li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="subcategory-card">
+                            <h4><i class="fas fa-pills"></i> Medications</h4>
+                            <p>Includes prescription drugs, over-the-counter meds, and supplements.</p>
+                            <div class="disposal-method">
+                                <h5>Disposal Method:</h5>
+                                <ul>
+                                    <li>Take to drug take-back programs</li>
+                                    <li>Some pharmacies have drop-off boxes</li>
+                                    <li>For some medications, FDA recommends flushing</li>
+                                    <li>Never share or reuse medications</li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="subcategory-card">
+                            <h4><i class="fas fa-band-aid"></i> Medical Supplies</h4>
+                            <p>Includes bandages, gloves, masks, and other disposable medical items.</p>
+                            <div class="disposal-method">
+                                <h5>Disposal Method:</h5>
+                                <ul>
+                                    <li>Place in sealed bag if contaminated</li>
+                                    <li>Most can go in regular trash</li>
+                                    <li>Check local regulations for biohazard items</li>
+                                    <li>Large quantities may need special disposal</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Dashboard Section -->
+    <section class="dashboard" id="dashboard">
+        <div class="container">
+            <div class="section-title">
+                <h2>Waste Management Dashboard</h2>
+                <p>Track your waste disposal habits and environmental impact</p>
+            </div>
+            <div class="dashboard-container" id="dashboardContent">
+                <div class="welcome-message" id="welcomeMessage">
+                    Please login to access your personalized dashboard
+                </div>
+                <!-- Dashboard content will be loaded here after login -->
+            </div>
+        </div>
+    </section>
+
+    <!-- Collector Dashboard Section -->
+    <section class="collector-dashboard" id="collectorDashboard" style="display: none;">
+        <div class="container">
+            <div class="section-title">
+                <h2>Collector Dashboard</h2>
+                <p>Manage waste collection requests in your area</p>
+            </div>
+            <div class="dashboard-container" id="collectorDashboardContent">
+                <div class="welcome-message" id="collectorWelcomeMessage">
+                    Please login as a collector to access the dashboard
+                </div>
+                <!-- Collector dashboard content will be loaded here after login -->
+            </div>
+        </div>
+    </section>
+
+    <!-- Feedback Section -->
+    <section class="feedback" id="feedback">
+        <div class="container">
+            <div class="section-title">
+                <h2>Feedback & Contact</h2>
+                <p>We'd love to hear your thoughts and suggestions</p>
+            </div>
+            <div class="feedback-container">
+                <div class="feedback-form">
+                    <h3>Send Us a Message</h3>
+                    <form id="contactForm">
+                        <div class="form-row">
+                            <div class="form-col">
+                                <div class="form-group">
+                                    <label for="name">Name</label>
+                                    <input type="text" id="name" required>
+                                </div>
+                            </div>
+                            <div class="form-col">
+                                <div class="form-group">
+                                    <label for="email">Email</label>
+                                    <input type="email" id="email" required>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="subject">Subject</label>
+                            <input type="text" id="subject" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="message">Message</label>
+                            <textarea id="message" required></textarea>
+                        </div>
+                        <button type="submit" class="submit-btn">Send Message</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-col">
+                    <h4>EcoBin</h4>
+                    <p>Smart waste management solutions for a cleaner, greener planet.</p>
+                    <div class="social-links">
+                        <a href="#"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#"><i class="fab fa-twitter"></i></a>
+                        <a href="#"><i class="fab fa-instagram"></i></a>
+                        <a href="#"><i class="fab fa-linkedin-in"></i></a>
+                    </div>
+                </div>
+                <div class="footer-col">
+                    <h4>Quick Links</h4>
+                    <ul class="footer-links">
+                        <li><a href="#home">Home</a></li>
+                        <li><a href="#about">About</a></li>
+                        <li><a href="#dashboard">Dashboard</a></li>
+                        <li><a href="#detection">Waste Detection</a></li>
+                        <li><a href="#categories">Waste Categories</a></li>
+                    </ul>
+                </div>
+                <div class="footer-col">
+                    <h4>Resources</h4>
+                    <ul class="footer-links">
+                        <li><a href="#">Recycling Centers</a></li>
+                        <li><a href="#">Waste Management Tips</a></li>
+                        <li><a href="#">Environmental Impact</a></li>
+                        <li><a href="#">Community Initiatives</a></li>
+                        <li><a href="#">FAQ</a></li>
+                    </ul>
+                </div>
+                <div class="footer-col">
+                    <h4>Contact Us</h4>
+                    <p><i class="fas fa-map-marker-alt"></i> 202, MG Road, Near Tower Chowk, Dhule, Maharashtra - 424001, India</p>
+                    <p><i class="fas fa-phone"></i> +91 90123 45678</p>
+                    <p><i class="fas fa-envelope"></i> info@ecobin.com</p>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2025 EcoBin. All Rights Reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Notification Element -->
+    <div class="notification" id="notification">
+        <div class="notification-icon">
+            <i class="fas fa-check-circle"></i>
+        </div>
+        <div class="notification-content" id="notificationContent">
+            Notification message goes here
+        </div>
+        <div class="notification-close">
+            <i class="fas fa-times"></i>
+        </div>
+    </div>
+
+    <!-- Camera Permission Prompt -->
+    <div class="camera-permission-prompt" id="cameraPermissionPrompt" style="display: none;">
+        <h3>Camera Access Required</h3>
+        <p>EcoBin needs access to your camera to analyze waste items. We will only use your camera for waste detection and won't store any images without your permission.</p>
+        <div class="permission-buttons">
+            <button class="permission-btn allow" id="allowCamera">Allow Camera Access</button>
+            <button class="permission-btn deny" id="denyCamera">Deny Access</button>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        // User data and authentication
+        let currentUser = null;
+        let currentCollector = null;
+        const users = JSON.parse(localStorage.getItem('ecobin-users')) || [];
+        const collectors = JSON.parse(localStorage.getItem('ecobin-collectors')) || [
+            { id: 1, name: "Local Collector", email: "collector@ecobin.com", password: "collector123", phone: "9876543210", area: "Dhule City" }
+        ];
+        const wasteEntries = JSON.parse(localStorage.getItem('ecobin-waste-entries')) || [];
+        const collectionRequests = JSON.parse(localStorage.getItem('ecobin-collection-requests')) || [];
+
+        // DOM Elements
+        const loginBtn = document.getElementById('loginBtn');
+        const collectorBtn = document.getElementById('collectorBtn');
+        const loginModal = document.getElementById('loginModal');
+        const collectorLoginModal = document.getElementById('collectorLoginModal');
+        const registerModal = document.getElementById('registerModal');
+        const showRegister = document.getElementById('showRegister');
+        const showLogin = document.getElementById('showLogin');
+        const closeButtons = document.querySelectorAll('.close');
+        const loginForm = document.getElementById('loginForm');
+        const collectorLoginForm = document.getElementById('collectorLoginForm');
+        const registerForm = document.getElementById('registerForm');
+        const dashboardContent = document.getElementById('dashboardContent');
+        const collectorDashboardContent = document.getElementById('collectorDashboardContent');
+        const welcomeMessage = document.getElementById('welcomeMessage');
+        const collectorWelcomeMessage = document.getElementById('collectorWelcomeMessage');
+        const requestCollectionBtn = document.getElementById('requestCollectionBtn');
+        const collectionStatus = document.getElementById('collectionStatus');
+        const statusMessage = document.getElementById('statusMessage');
+        const notification = document.getElementById('notification');
+        const notificationContent = document.getElementById('notificationContent');
+        const notificationClose = document.querySelector('.notification-close');
+        const cameraPermissionPrompt = document.getElementById('cameraPermissionPrompt');
+        const allowCameraBtn = document.getElementById('allowCamera');
+        const denyCameraBtn = document.getElementById('denyCamera');
+        const contactForm = document.getElementById('contactForm');
+
+        // Password toggle elements
+        const toggleLoginPassword = document.getElementById('toggleLoginPassword');
+        const toggleCollectorLoginPassword = document.getElementById('toggleCollectorLoginPassword');
+        const toggleRegisterPassword = document.getElementById('toggleRegisterPassword');
+        const toggleConfirmPassword = document.getElementById('toggleConfirmPassword');
+        const loginPassword = document.getElementById('loginPassword');
+        const collectorLoginPassword = document.getElementById('collectorLoginPassword');
+        const registerPassword = document.getElementById('registerPassword');
+        const confirmPassword = document.getElementById('registerConfirmPassword');
+
+        // Password strength elements
+        const passwordInput = document.getElementById('registerPassword');
+        const passwordStrengthBar = document.getElementById('passwordStrengthBar');
+        const lengthReq = document.getElementById('lengthReq');
+        const uppercaseReq = document.getElementById('uppercaseReq');
+        const lowercaseReq = document.getElementById('lowercaseReq');
+        const numberReq = document.getElementById('numberReq');
+        const specialReq = document.getElementById('specialReq');
+
+        // Camera elements
+        const cameraPreview = document.getElementById('cameraPreview');
+        const captureBtn = document.getElementById('captureBtn');
+        const uploadBtn = document.getElementById('uploadBtn');
+        const fileInput = document.getElementById('fileInput');
+        const resultDisplay = document.getElementById('resultDisplay');
+        
+        let stream = null;
+        let cameraAllowed = false;
+
+        // Toggle password visibility
+        toggleLoginPassword.addEventListener('click', function() {
+            const type = loginPassword.getAttribute('type') === 'password' ? 'text' : 'password';
+            loginPassword.setAttribute('type', type);
+            this.classList.toggle('fa-eye-slash');
+        });
+
+        toggleCollectorLoginPassword.addEventListener('click', function() {
+            const type = collectorLoginPassword.getAttribute('type') === 'password' ? 'text' : 'password';
+            collectorLoginPassword.setAttribute('type', type);
+            this.classList.toggle('fa-eye-slash');
+        });
+
+        toggleRegisterPassword.addEventListener('click', function() {
+            const type = registerPassword.getAttribute('type') === 'password' ? 'text' : 'password';
+            registerPassword.setAttribute('type', type);
+            this.classList.toggle('fa-eye-slash');
+        });
+
+        toggleConfirmPassword.addEventListener('click', function() {
+            const type = confirmPassword.getAttribute('type') === 'password' ? 'text' : 'password';
+            confirmPassword.setAttribute('type', type);
+            this.classList.toggle('fa-eye-slash');
+        });
+
+        // Phone number validation
+        document.getElementById('registerPhone').addEventListener('input', function(e) {
+            this.value = this.value.replace(/[^0-9]/g, '');
+            if (this.value.length > 10) {
+                this.value = this.value.slice(0, 10);
+            }
+        });
+
+        // Modal functionality
+        loginBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            if (currentUser) {
+                logout();
+            } else if (currentCollector) {
+                collectorLogout();
+            } else {
+                loginModal.style.display = 'block';
+            }
+        });
+
+        collectorBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            if (currentCollector) {
+                collectorLogout();
+            } else if (currentUser) {
+                logout();
+            } else {
+                collectorLoginModal.style.display = 'block';
+            }
+        });
+
+        showRegister.addEventListener('click', (e) => {
+            e.preventDefault();
+            loginModal.style.display = 'none';
+            registerModal.style.display = 'block';
+        });
+
+        showLogin.addEventListener('click', (e) => {
+            e.preventDefault();
+            registerModal.style.display = 'none';
+            loginModal.style.display = 'block';
+        });
+
+        closeButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                loginModal.style.display = 'none';
+                registerModal.style.display = 'none';
+                collectorLoginModal.style.display = 'none';
+            });
+        });
+
+        window.addEventListener('click', (e) => {
+            if (e.target === loginModal) {
+                loginModal.style.display = 'none';
+            }
+            if (e.target === registerModal) {
+                registerModal.style.display = 'none';
+            }
+            if (e.target === collectorLoginModal) {
+                collectorLoginModal.style.display = 'none';
+            }
+        });
+
+        // Password strength checker
+        passwordInput.addEventListener('input', function() {
+            const password = this.value;
+            let strength = 0;
+            
+            // Check length (minimum 8 characters)
+            if (password.length >= 8) {
+                strength += 1;
+                lengthReq.style.color = '#4CAF50';
+            } else {
+                lengthReq.style.color = '#f44336';
+            }
+            
+            // Check for uppercase letters
+            if (/[A-Z]/.test(password)) {
+                strength += 1;
+                uppercaseReq.style.color = '#4CAF50';
+            } else {
+                uppercaseReq.style.color = '#f44336';
+            }
+            
+            // Check for lowercase letters
+            if (/[a-z]/.test(password)) {
+                strength += 1;
+                lowercaseReq.style.color = '#4CAF50';
+            } else {
+                lowercaseReq.style.color = '#f44336';
+            }
+            
+            // Check for numbers
+            if (/[0-9]/.test(password)) {
+                strength += 1;
+                numberReq.style.color = '#4CAF50';
+            } else {
+                numberReq.style.color = '#f44336';
+            }
+            
+            // Check for special characters
+            if (/[^A-Za-z0-9]/.test(password)) {
+                strength += 1;
+                specialReq.style.color = '#4CAF50';
+            } else {
+                specialReq.style.color = '#f44336';
+            }
+            
+            // Update strength bar
+            const strengthPercent = (strength / 5) * 100;
+            passwordStrengthBar.style.width = strengthPercent + '%';
+            
+            // Update bar color
+            if (strengthPercent < 40) {
+                passwordStrengthBar.style.backgroundColor = '#f44336';
+            } else if (strengthPercent < 80) {
+                passwordStrengthBar.style.backgroundColor = '#FF9800';
+            } else {
+                passwordStrengthBar.style.backgroundColor = '#4CAF50';
+            }
+        });
+
+        // Form validation
+        function showError(element, message) {
+            const errorElement = document.getElementById(`${element.id}Error`);
+            errorElement.textContent = message;
+            errorElement.style.display = 'block';
+            element.style.borderColor = 'var(--error-color)';
+        }
+
+        function hideError(element) {
+            const errorElement = document.getElementById(`${element.id}Error`);
+            errorElement.style.display = 'none';
+            element.style.borderColor = '#ddd';
+        }
+
+        // Show notification
+        function showNotification(message, type = 'success') {
+            notification.className = `notification ${type} show`;
+            notificationContent.textContent = message;
+            
+            // Set appropriate icon
+            const icon = notification.querySelector('.notification-icon i');
+            if (type === 'success') {
+                icon.className = 'fas fa-check-circle';
+            } else if (type === 'error') {
+                icon.className = 'fas fa-exclamation-circle';
+            } else if (type === 'warning') {
+                icon.className = 'fas fa-exclamation-triangle';
+            } else {
+                icon.className = 'fas fa-info-circle';
+            }
+            
+            // Auto-hide after 5 seconds
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 5000);
+        }
+
+        // Close notification
+        notificationClose.addEventListener('click', () => {
+            notification.classList.remove('show');
+        });
+
+        // Login functionality - Updated to use PHP API
+        loginForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const email = document.getElementById('loginEmail');
+            const password = document.getElementById('loginPassword');
+            let isValid = true;
+
+            // Validate email
+            if (!email.value || !email.value.includes('@')) {
+                showError(email, 'Please enter a valid email');
+                isValid = false;
+            } else {
+                hideError(email);
+            }
+
+            // Validate password
+            if (!password.value || password.value.length < 6) {
+                showError(password, 'Password must be at least 6 characters');
+                isValid = false;
+            } else {
+                hideError(password);
+            }
+
+            if (isValid) {
+                try {
+                    const response = await fetch('api.php/api/login', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            email: email.value,
+                            password: password.value
+                        })
+                    });
+
+                    const data = await response.json();
+
+                    if (data.success) {
+                        currentUser = data.data.user;
+                        localStorage.setItem('ecobin-current-user', JSON.stringify(currentUser));
+                        updateUI();
+                        loginModal.style.display = 'none';
+                        loginForm.reset();
+                        showNotification('Login successful!', 'success');
+                    } else {
+                        showError(password, data.message || 'Invalid email or password');
+                    }
+                } catch (error) {
+                    console.error('Login error:', error);
+                    showNotification('Failed to login. Please try again.', 'error');
+                }
+            }
+        });
+
+        // Collector Login functionality
+collectorLoginForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const email = document.getElementById('collectorLoginEmail');
+    const password = document.getElementById('collectorLoginPassword');
+    let isValid = true;
+
+    // Validate email
+    if (!email.value || !email.value.includes('@')) {
+        showError(email, 'Please enter a valid email');
+        isValid = false;
+    } else {
+        hideError(email);
+    }
+
+    // Validate password
+    if (!password.value || password.value.length < 6) {
+        showError(password, 'Password must be at least 6 characters');
+        isValid = false;
+    } else {
+        hideError(password);
+    }
+
+    if (isValid) {
+        try {
+            const response = await fetch('api.php/collector-login', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    email: email.value,
+                    password: password.value
+                })
+            });
+
+            const data = await response.json();
+
+            if (data.success) {
+                currentCollector = data.data.collector;
+                localStorage.setItem('ecobin-current-collector', JSON.stringify(currentCollector));
+                updateUI();
+                collectorLoginModal.style.display = 'none';
+                collectorLoginForm.reset();
+                showNotification('Collector login successful!', 'success');
+                
+                // Load collector info
+                const infoResponse = await fetch(`api.php/collector-info?collectorId=${currentCollector.id}`);
+                const infoData = await infoResponse.json();
+                
+                if (infoData.success) {
+                    currentCollector = infoData.data.collector;
+                    localStorage.setItem('ecobin-current-collector', JSON.stringify(currentCollector));
+                    loadCollectorDashboard();
+                }
+            } else {
+                showError(password, data.message || 'Invalid email or password');
+            }
+        } catch (error) {
+            console.error('Collector login error:', error);
+            showNotification('Failed to login. Please try again.', 'error');
+        }
+    }
+});
+        // Registration functionality - Updated to use PHP API
+        registerForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const name = document.getElementById('registerName');
+            const email = document.getElementById('registerEmail');
+            const password = document.getElementById('registerPassword');
+            const confirmPassword = document.getElementById('registerConfirmPassword');
+            const address = document.getElementById('registerAddress');
+            const phone = document.getElementById('registerPhone');
+            let isValid = true;
+
+            // Validate name
+            if (!name.value) {
+                showError(name, 'Please enter your name');
+                isValid = false;
+            } else {
+                hideError(name);
+            }
+
+            // Validate email
+            if (!email.value || !email.value.includes('@')) {
+                showError(email, 'Please enter a valid email');
+                isValid = false;
+            } else {
+                hideError(email);
+            }
+
+            // Validate password
+            if (!password.value || password.value.length < 8) {
+                showError(password, 'Password must be at least 8 characters long');
+                isValid = false;
+            } else if (!/[A-Z]/.test(password.value)) {
+                showError(password, 'Password must contain at least one uppercase letter');
+                isValid = false;
+            } else if (!/[a-z]/.test(password.value)) {
+                showError(password, 'Password must contain at least one lowercase letter');
+                isValid = false;
+            } else if (!/[0-9]/.test(password.value)) {
+                showError(password, 'Password must contain at least one number');
+                isValid = false;
+            } else if (!/[^A-Za-z0-9]/.test(password.value)) {
+                showError(password, 'Password must contain at least one special character');
+                isValid = false;
+            } else {
+                hideError(password);
+            }
+
+            // Validate confirm password
+            if (password.value !== confirmPassword.value) {
+                showError(confirmPassword, 'Passwords do not match');
+                isValid = false;
+            } else {
+                hideError(confirmPassword);
+            }
+
+            // Validate address
+            if (!address.value) {
+                showError(address, 'Please enter your address');
+                isValid = false;
+            } else {
+                hideError(address);
+            }
+
+            // Validate phone
+            if (!phone.value || !/^\d{10}$/.test(phone.value)) {
+                showError(phone, 'Please enter a valid 10-digit phone number');
+                isValid = false;
+            } else {
+                hideError(phone);
+            }
+
+            if (isValid) {
+                try {
+                    const response = await fetch('api.php/api/register', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            name: name.value,
+                            email: email.value,
+                            password: password.value,
+                            address: address.value,
+                            phone: phone.value
+                        })
+                    });
+
+                    const data = await response.json();
+
+                    if (data.success) {
+                        // Get the user data after successful registration
+                        const loginResponse = await fetch('api.php/api/login', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify({
+                                email: email.value,
+                                password: password.value
+                            })
+                        });
+
+                        const loginData = await loginResponse.json();
+
+                        if (loginData.success) {
+                            currentUser = loginData.data.user;
+                            localStorage.setItem('ecobin-current-user', JSON.stringify(currentUser));
+                            updateUI();
+                            registerModal.style.display = 'none';
+                            registerForm.reset();
+                            showNotification('Registration successful!', 'success');
+                        } else {
+                            showNotification('Registration successful but failed to login automatically. Please login manually.', 'warning');
+                        }
+                    } else {
+                        showError(email, data.message || 'Registration failed');
+                    }
+                } catch (error) {
+                    console.error('Registration error:', error);
+                    showNotification('Failed to register. Please try again.', 'error');
+                }
+            }
+        });
+
+        // Logout functionality
+        function logout() {
+            // Reset waste detection interface
+            if (stream) {
+                stream.getTracks().forEach(track => track.stop());
+                stream = null;
+            }
+            cameraPreview.innerHTML = '<i class="fas fa-camera" style="font-size: 3rem; color: #666;"></i>';
+            resultDisplay.style.display = 'none';
+            if (captureBtn) captureBtn.textContent = 'Open Camera';
+            
+            currentUser = null;
+            localStorage.removeItem('ecobin-current-user');
+            updateUI();
+            showNotification('Logged out successfully', 'info');
+        }
+
+        // Collector logout functionality
+        function collectorLogout() {
+            currentCollector = null;
+            localStorage.removeItem('ecobin-current-collector');
+            updateUI();
+            showNotification('Collector logged out successfully', 'info');
+        }
+
+        // Update UI based on authentication state
+        function updateUI() {
+            if (currentUser) {
+                loginBtn.textContent = 'Logout';
+                collectorBtn.style.display = 'none';
+                welcomeMessage.textContent = `Welcome back, ${currentUser.name}!`;
+                document.getElementById('dashboard').style.display = 'block';
+                document.getElementById('collectorDashboard').style.display = 'none';
+                loadDashboard();
+            } else if (currentCollector) {
+                collectorBtn.textContent = 'Collector Logout';
+                loginBtn.style.display = 'none';
+                collectorWelcomeMessage.textContent = `Welcome, ${currentCollector.name}!`;
+                document.getElementById('dashboard').style.display = 'none';
+                document.getElementById('collectorDashboard').style.display = 'block';
+                loadCollectorDashboard();
+            } else {
+                loginBtn.textContent = 'Login';
+                loginBtn.style.display = 'block';
+                collectorBtn.textContent = 'Collector Login';
+                collectorBtn.style.display = 'block';
+                welcomeMessage.textContent = 'Please login to access your personalized dashboard';
+                collectorWelcomeMessage.textContent = 'Please login as a collector to access the dashboard';
+                document.getElementById('dashboard').style.display = 'block';
+                document.getElementById('collectorDashboard').style.display = 'none';
+                
+                dashboardContent.innerHTML = `
+                    <div class="welcome-message" id="welcomeMessage">
+                        Please login to access your personalized dashboard
+                    </div>
+                `;
+                
+                collectorDashboardContent.innerHTML = `
+                    <div class="welcome-message" id="collectorWelcomeMessage">
+                        Please login as a collector to access the dashboard
+                    </div>
+                `;
+            }
+        }
+
+        // Load dashboard - Keep the same as before since we're using localStorage for waste entries
+        function loadDashboard() {
+            const userEntries = wasteEntries.filter(entry => entry.userId === currentUser.id);
+            const userRequests = collectionRequests.filter(request => request.userId === currentUser.id);
+            
+            // Calculate stats
+            const totalWaste = userEntries.reduce((sum, entry) => sum + entry.amount, 0);
+            const recyclingCount = userEntries.filter(entry => entry.method === 'recycling').length;
+            const recyclingRate = userEntries.length > 0 ? Math.round((recyclingCount / userEntries.length) * 100) : 0;
+            const carbonSaved = Math.round(totalWaste * 0.3); // Simplified calculation
+            
+            // Waste by type
+            const wasteByType = {
+                plastic: 0,
+                paper: 0,
+                glass: 0,
+                metal: 0,
+                organic: 0,
+                hazardous: 0,
+                'e-waste': 0,
+                other: 0
+            };
+            
+            userEntries.forEach(entry => {
+                wasteByType[entry.type] += entry.amount;
+            });
+            
+            // Monthly trend data
+            const monthlyData = {};
+            userEntries.forEach(entry => {
+                const date = new Date(entry.date);
+                const monthYear = `${date.getFullYear()}-${date.getMonth() + 1}`;
+                if (!monthlyData[monthYear]) {
+                    monthlyData[monthYear] = 0;
+                }
+                monthlyData[monthYear] += entry.amount;
+            });
+            
+            const sortedMonths = Object.keys(monthlyData).sort();
+            const last7Months = sortedMonths.slice(-7);
+            const monthlyWaste = last7Months.map(month => monthlyData[month]);
+            
+            // Create dashboard HTML
+            dashboardContent.innerHTML = `
+                <div class="welcome-message" id="welcomeMessage">
+                    Welcome back, ${currentUser.name}!
+                </div>
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <h4>Total Waste Disposed</h4>
+                        <div class="stat-value">${totalWaste.toFixed(1)} kg</div>
+                        <p>All time</p>
+                    </div>
+                    <div class="stat-card">
+                        <h4>Recycling Rate</h4>
+                        <div class="stat-value">${recyclingRate}%</div>
+                        <p>${recyclingCount} of ${userEntries.length} items</p>
+                    </div>
+                    <div class="stat-card">
+                        <h4>Carbon Footprint</h4>
+                        <div class="stat-value">${carbonSaved} kg</div>
+                        <p>CO2 saved</p>
+                    </div>
+                    <div class="stat-card">
+                        <h4>Waste Categories</h4>
+                        <div class="stat-value">${Object.keys(wasteByType).filter(type => wasteByType[type] > 0).length}</div>
+                        <p>Types managed</p>
+                    </div>
+                </div>
+                
+                <div class="charts">
+                    <div class="chart-container">
+                        <h4>Waste Composition</h4>
+                        <div class="chart">
+                            <canvas id="pieChartCanvas" width="400" height="300"></canvas>
+                        </div>
+                    </div>
+                    <div class="chart-container">
+                        <h4>Monthly Waste Trend</h4>
+                        <div class="chart">
+                            <canvas id="lineChartCanvas" width="400" height="300"></canvas>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="waste-input">
+                    <div class="input-form">
+                        <h4>Add Waste Entry</h4>
+                        <div class="form-group">
+                            <label for="wasteTypeInput">Waste Type</label>
+                            <select id="wasteTypeInput">
+                                <option value="">Select waste type</option>
+                                <option value="plastic">Plastic</option>
+                                <option value="paper">Paper</option>
+                                <option value="glass">Glass</option>
+                                <option value="metal">Metal</option>
+                                <option value="organic">Organic/Food</option>
+                                <option value="hazardous">Hazardous</option>
+                                <option value="e-waste">E-Waste</option>
+                                <option value="other">Other</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="wasteAmount">Amount (kg)</label>
+                            <input type="number" id="wasteAmount" min="0.1" step="0.1" placeholder="0.5">
+                        </div>
+                        <div class="form-group">
+                            <label for="disposalMethod">Disposal Method</label>
+                            <select id="disposalMethod">
+                                <option value="">Select method</option>
+                                <option value="recycling">Recycling</option>
+                                <option value="compost">Compost</option>
+                                <option value="landfill">Landfill</option>
+                                <option value="special">Special Handling</option>
+                                <option value="donation">Donation/Reuse</option>
+                            </select>
+                        </div>
+                        <button class="submit-btn" id="addWasteBtn">Add Entry</button>
+                    </div>
+                </div>
+                
+                <div class="collection-requests">
+                    <h4>Your Collection Requests</h4>
+                    <div class="requests-list" id="requestsList">
+                        ${userRequests.length > 0 ? 
+                            userRequests.map(request => `
+                                <div class="request-card">
+                                    <div class="request-info">
+                                        <h5>${request.wasteType} Collection</h5>
+                                        <p>Requested on ${new Date(request.date).toLocaleDateString()}</p>
+                                        <p>Status: ${request.status}</p>
+                                    </div>
+                                    <div class="request-status ${getStatusClass(request.status)}">
+                                        ${request.status}
+                                    </div>
+                                </div>
+                            `).join('') : 
+                            '<p>No collection requests yet.</p>'
+                        }
+                    </div>
+                </div>
+            `;
+            
+            // Create charts
+            createPieChart(wasteByType);
+            createLineChart(last7Months, monthlyWaste);
+            
+            // Add event listener for new waste entries
+            document.getElementById('addWasteBtn').addEventListener('click', addWasteEntry);
+        }
+
+        // Load collector dashboard
+        function loadCollectorDashboard() {
+            // Get all pending and approved requests for the collector's area
+            const areaRequests = collectionRequests.filter(request => 
+                request.status === 'Pending' || request.status === 'Approved'
+            );
+            
+            // Calculate stats
+            const totalRequests = areaRequests.length;
+            const pendingRequests = areaRequests.filter(request => request.status === 'Pending').length;
+            const approvedRequests = areaRequests.filter(request => request.status === 'Approved').length;
+            const completedRequests = collectionRequests.filter(request => 
+                request.status === 'Completed' && request.collectorId === currentCollector.id
+            ).length;
+            
+            collectorDashboardContent.innerHTML = `
+                <div class="welcome-message" id="collectorWelcomeMessage">
+                    Welcome, ${currentCollector.name}! (${currentCollector.area})
+                </div>
+                
+                <div class="collector-stats">
+                    <div class="collector-stat-card">
+                        <h4>Total Requests</h4>
+                        <div class="collector-stat-value">${totalRequests}</div>
+                        <p>In your area</p>
+                    </div>
+                    <div class="collector-stat-card">
+                        <h4>Pending Requests</h4>
+                        <div class="collector-stat-value">${pendingRequests}</div>
+                        <p>Waiting for approval</p>
+                    </div>
+                    <div class="collector-stat-card">
+                        <h4>Approved Requests</h4>
+                        <div class="collector-stat-value">${approvedRequests}</div>
+                        <p>Ready for collection</p>
+                    </div>
+                    <div class="collector-stat-card">
+                        <h4>Completed</h4>
+                        <div class="collector-stat-value">${completedRequests}</div>
+                        <p>By you</p>
+                    </div>
+                </div>
+                
+                <div class="collection-requests">
+                    <h4>Collection Requests in Your Area</h4>
+                    <div class="requests-list" id="collectorRequestsList">
+                        ${areaRequests.length > 0 ? 
+                            areaRequests.map(request => {
+                                const user = users.find(u => u.id === request.userId) || { name: 'Unknown User', address: request.address };
+                                return `
+                                    <div class="request-card" data-id="${request.id}">
+                                        <div class="request-info">
+                                            <h5>${request.wasteType} Collection</h5>
+                                            <p>From: ${user.name}</p>
+                                            <p>Address: ${user.address || request.address}</p>
+                                            <p>Requested on: ${new Date(request.date).toLocaleDateString()}</p>
+                                        </div>
+                                        <div class="request-status ${getStatusClass(request.status)}">
+                                            ${request.status}
+                                        </div>
+                                        ${request.status === 'Pending' ? `
+                                            <div class="collector-actions">
+                                                <button class="action-btn approve-btn" data-action="approve">Approve</button>
+                                                <button class="action-btn reject-btn" data-action="reject">Reject</button>
+                                            </div>
+                                        ` : ''}
+                                        ${request.status === 'Approved' ? `
+                                            <div class="collector-actions">
+                                                <button class="action-btn complete-btn" data-action="complete">Mark as Completed</button>
+                                            </div>
+                                        ` : ''}
+                                    </div>
+                                `;
+                            }).join('') : 
+                            '<p>No collection requests in your area at this time.</p>'
+                        }
+                    </div>
+                </div>
+            `;
+            
+            // Add event listeners for action buttons
+            document.querySelectorAll('.action-btn').forEach(button => {
+                button.addEventListener('click', function() {
+                    const action = this.getAttribute('data-action');
+                    const requestCard = this.closest('.request-card');
+                    const requestId = requestCard.getAttribute('data-id');
+                    handleCollectorAction(requestId, action);
+                });
+            });
+        }
+
+        // Handle collector actions (approve, reject, complete)
+        function handleCollectorAction(requestId, action) {
+            const request = collectionRequests.find(r => r.id === requestId);
+            if (!request) return;
+            
+            switch(action) {
+                case 'approve':
+                    request.status = 'Approved';
+                    request.collectorId = currentCollector.id;
+                    request.approvedDate = new Date().toISOString();
+                    showNotification(`Request #${requestId} approved successfully`, 'success');
+                    break;
+                case 'reject':
+                    request.status = 'Rejected';
+                    request.collectorId = currentCollector.id;
+                    showNotification(`Request #${requestId} rejected`, 'info');
+                    break;
+                case 'complete':
+                    request.status = 'Completed';
+                    request.completedDate = new Date().toISOString();
+                    showNotification(`Request #${requestId} marked as completed`, 'success');
+                    break;
+            }
+            
+            // Update local storage
+            localStorage.setItem('ecobin-collection-requests', JSON.stringify(collectionRequests));
+            
+            // Reload dashboard
+            loadCollectorDashboard();
+        }
+
+        function getStatusClass(status) {
+            switch(status.toLowerCase()) {
+                case 'pending': return 'status-pending';
+                case 'approved': return 'status-approved';
+                case 'completed': return 'status-completed';
+                case 'rejected': return 'status-rejected';
+                default: return '';
+            }
+        }
+
+        // Create pie chart
+        function createPieChart(wasteData) {
+            const pieChartCtx = document.getElementById('pieChartCanvas').getContext('2d');
+            
+            const labels = [];
+            const data = [];
+            const backgroundColors = [
+                '#4CAF50', '#8BC34A', '#CDDC39', '#FFC107', 
+                '#FF9800', '#607D8B', '#9E9E9E', '#795548'
+            ];
+            
+            Object.entries(wasteData).forEach(([type, amount], index) => {
+                if (amount > 0) {
+                    labels.push(type.charAt(0).toUpperCase() + type.slice(1));
+                    data.push(amount);
+                }
+            });
+            
+            new Chart(pieChartCtx, {
+                type: 'pie',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        data: data,
+                        backgroundColor: backgroundColors.slice(0, labels.length),
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'right'
+                        }
+                    }
+                }
+            });
+        }
+
+        // Create line chart
+        function createLineChart(labels, data) {
+            const lineChartCtx = document.getElementById('lineChartCanvas').getContext('2d');
+            
+            // Format month labels to be more readable
+            const formattedLabels = labels.map(label => {
+                const [year, month] = label.split('-');
+                const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+                return `${monthNames[parseInt(month) - 1]} ${year}`;
+            });
+            
+            new Chart(lineChartCtx, {
+                type: 'line',
+                data: {
+                    labels: formattedLabels,
+                    datasets: [{
+                        label: 'Total Waste (kg)',
+                        data: data,
+                        borderColor: '#4CAF50',
+                        backgroundColor: 'rgba(76, 175, 80, 0.1)',
+                        fill: true,
+                        tension: 0.3,
+                        borderWidth: 2,
+                        pointBackgroundColor: '#2E7D32',
+                        pointRadius: 4,
+                        pointHoverRadius: 6
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: false,
+                            title: {
+                                display: true,
+                                text: 'Kilograms (kg)'
+                            }
+                        },
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Month'
+                            }
+                        }
+                    },
+                    plugins: {
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return `Waste: ${context.parsed.y} kg`;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Add new waste entry - Keep using localStorage
+        function addWasteEntry() {
+            const typeInput = document.getElementById('wasteTypeInput');
+            const amountInput = document.getElementById('wasteAmount');
+            const methodInput = document.getElementById('disposalMethod');
+            
+            if (!typeInput.value || !amountInput.value || !methodInput.value) {
+                showNotification('Please fill all fields', 'error');
+                return;
+            }
+            
+            const newEntry = {
+                id: Date.now().toString(),
+                userId: currentUser.id,
+                type: typeInput.value,
+                amount: parseFloat(amountInput.value),
+                method: methodInput.value,
+                date: new Date().toISOString()
+            };
+            
+            wasteEntries.push(newEntry);
+            localStorage.setItem('ecobin-waste-entries', JSON.stringify(wasteEntries));
+            
+            // Reload dashboard to show updated data
+            loadDashboard();
+            
+            // Reset form
+            typeInput.value = '';
+            amountInput.value = '';
+            methodInput.value = '';
+            
+            // Show success message
+            showNotification('Waste entry added successfully!', 'success');
+        }
+
+        // Request collection functionality - Updated to use PHP API
+        if (requestCollectionBtn) {
+            requestCollectionBtn.addEventListener('click', async () => {
+                const wasteType = document.getElementById('wasteType').textContent;
+                
+                try {
+                    const response = await fetch('api.php/api/collection', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            userId: currentUser.id,
+                            wasteType: wasteType,
+                            address: currentUser.address
+                        })
+                    });
+
+                    const data = await response.json();
+
+                    if (data.success) {
+                        // Update local storage with the new request
+                        const newRequest = {
+                            id: data.data.requestId.toString(),
+                            userId: currentUser.id,
+                            wasteType: wasteType,
+                            date: new Date().toISOString(),
+                            status: 'Pending',
+                            address: currentUser.address
+                        };
+                        
+                        collectionRequests.push(newRequest);
+                        localStorage.setItem('ecobin-collection-requests', JSON.stringify(collectionRequests));
+                        
+                        // Update UI
+                        collectionStatus.style.display = 'block';
+                        collectionStatus.className = 'collection-status status-pending';
+                        statusMessage.textContent = `Your ${wasteType} collection request has been submitted. Status: Pending`;
+                        
+                        // Show notification
+                        showNotification('Collection request submitted successfully! Admin will review your request.', 'success');
+                    } else {
+                        showNotification(data.message || 'Failed to submit collection request', 'error');
+                    }
+                } catch (error) {
+                    console.error('Collection request error:', error);
+                    showNotification('Failed to submit collection request. Please try again.', 'error');
+                }
+            });
+        }
+
+        // Tab functionality for waste categories
+        const tabBtns = document.querySelectorAll('.tab-btn');
+        const categoryContents = document.querySelectorAll('.category-content');
+        
+        tabBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                // Remove active class from all buttons and contents
+                tabBtns.forEach(btn => btn.classList.remove('active'));
+                categoryContents.forEach(content => content.classList.remove('active'));
+                
+                // Add active class to clicked button
+                btn.classList.add('active');
+                
+                // Show corresponding content
+                const category = btn.getAttribute('data-category');
+                document.getElementById(`${category}-content`).classList.add('active');
+            });
+        });
+        
+        // Camera functionality with permission handling
+        allowCameraBtn.addEventListener('click', () => {
+            cameraPermissionPrompt.style.display = 'none';
+            cameraAllowed = true;
+            startCamera();
+        });
+        
+        denyCameraBtn.addEventListener('click', () => {
+            cameraPermissionPrompt.style.display = 'none';
+            cameraAllowed = false;
+            showNotification('Camera access is required for waste detection', 'warning');
+        });
+        
+        function showCameraPermissionPrompt() {
+            cameraPermissionPrompt.style.display = 'flex';
+        }
+        
+        async function startCamera() {
+            try {
+                if (!cameraAllowed) {
+                    showCameraPermissionPrompt();
+                    return;
+                }
+                
+                stream = await navigator.mediaDevices.getUserMedia({ 
+                    video: { 
+                        facingMode: 'environment' // Prefer rear camera
+                    },
+                    audio: false 
+                });
+                
+                const video = document.createElement('video');
+                video.srcObject = stream;
+                video.setAttribute('playsinline', ''); // For iOS
+                video.play();
+                
+                cameraPreview.innerHTML = '';
+                cameraPreview.appendChild(video);
+                captureBtn.textContent = 'Capture Image';
+                
+                // Show result display with sample data (simulating AI detection)
+                setTimeout(() => {
+                    resultDisplay.style.display = 'block';
+                    
+                    // Simulate different waste types
+                    const wasteTypes = [
+                        {
+                            type: 'Plastic Bottle',
+                            instructions: [
+                                'Rinse the bottle to remove any residue',
+                                'Remove the cap and separate it (often different recycling)',
+                                'Check local recycling guidelines for plastic types',
+                                'Place in recycling bin or take to recycling center'
+                            ]
+                        },
+                        {
+                            type: 'Paper Waste',
+                            instructions: [
+                                'Keep paper dry and clean',
+                                'Remove any non-paper components (plastic windows, staples)',
+                                'Flatten cardboard boxes',
+                                'Place in paper recycling bin'
+                            ]
+                        },
+                        {
+                            type: 'Glass Container',
+                            instructions: [
+                                'Rinse thoroughly to remove residue',
+                                'Remove lids and caps (often different material)',
+                                'Separate by color if required by local facility',
+                                'Place in glass recycling bin or take to collection point'
+                            ]
+                        },
+                        {
+                            type: 'Organic Waste',
+                            instructions: [
+                                'Collect in a compost bin or container',
+                                'Avoid mixing with non-biodegradable items',
+                                'Use for home composting if possible',
+                                'Otherwise dispose in municipal organic waste bin'
+                            ]
+                        },
+                        {
+                            type: 'Electronic Device',
+                            instructions: [
+                                'Remove batteries if possible',
+                                'Wipe personal data from devices',
+                                'Take to e-waste recycling centers',
+                                'Many retailers offer trade-in or recycling programs'
+                            ]
+                        }
+                    ];
+                    
+                    const randomType = wasteTypes[Math.floor(Math.random() * wasteTypes.length)];
+                    
+                    document.getElementById('wasteType').textContent = randomType.type;
+                    const stepsList = document.querySelector('#disposalSteps ol');
+                    stepsList.innerHTML = randomType.instructions.map(step => `<li>${step}</li>`).join('');
+                    
+                    // Show collection request button if user is logged in
+                    if (currentUser) {
+                        document.getElementById('requestCollectionBtn').style.display = 'block';
+                    } else {
+                        document.getElementById('requestCollectionBtn').style.display = 'none';
+                    }
+                }, 1500);
+            } catch (err) {
+                console.error('Error accessing camera:', err);
+                showNotification('Could not access camera. Please check permissions.', 'error');
+                cameraPreview.innerHTML = '<i class="fas fa-camera" style="font-size: 3rem; color: #666;"></i>';
+                captureBtn.textContent = 'Open Camera';
+            }
+        }
+        
+        captureBtn.addEventListener('click', async () => {
+            try {
+                if (captureBtn.textContent === 'Open Camera') {
+                    // Check if we already have permission
+                    const permissionState = await navigator.permissions.query({ name: 'camera' });
+                    if (permissionState.state === 'granted') {
+                        cameraAllowed = true;
+                        startCamera();
+                    } else {
+                        showCameraPermissionPrompt();
+                    }
+                } else {
+                    // Capture image logic would go here
+                    alert('Image captured! Waste type detected.');
+                }
+            } catch (err) {
+                console.error('Error checking camera permission:', err);
+                showCameraPermissionPrompt();
+            }
+        });
+        
+        uploadBtn.addEventListener('click', () => {
+            fileInput.click();
+        });
+        
+        fileInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                // Validate file type
+                const validTypes = ['image/jpeg', 'image/png', 'image/gif'];
+                if (!validTypes.includes(file.type)) {
+                    showNotification('Only JPG, PNG, and GIF images are allowed', 'error');
+                    return;
+                }
+                
+                const reader = new FileReader();
+                reader.onload = (event) => {
+                    cameraPreview.innerHTML = `<img src="${event.target.result}" alt="Uploaded waste" style="max-width: 100%; max-height: 100%; object-fit: contain;">`;
+                    
+                    // Show result display with sample data (simulating AI detection)
+                    setTimeout(() => {
+                        resultDisplay.style.display = 'block';
+                        
+                        // Simulate different waste types based on file name
+                        const fileName = file.name.toLowerCase();
+                        let wasteType = 'General Waste';
+                        let disposalSteps = [
+                            'Place in appropriate waste bin',
+                            'Check local recycling guidelines',
+                            'Consider reuse or donation if applicable'
+                        ];
+                        
+                        if (fileName.includes('plastic') || fileName.includes('bottle')) {
+                            wasteType = 'Plastic Bottle';
+                            disposalSteps = [
+                                'Rinse the bottle to remove any residue',
+                                'Remove the cap and separate it (often different recycling)',
+                                'Check local recycling guidelines for plastic types',
+                                'Place in recycling bin or take to recycling center'
+                            ];
+                        } else if (fileName.includes('paper') || fileName.includes('cardboard')) {
+                            wasteType = 'Paper Waste';
+                            disposalSteps = [
+                                'Keep paper dry and clean',
+                                'Remove any non-paper components (plastic windows, staples)',
+                                'Flatten cardboard boxes',
+                                'Place in paper recycling bin'
+                            ];
+                        } else if (fileName.includes('food') || fileName.includes('organic')) {
+                            wasteType = 'Organic Waste';
+                            disposalSteps = [
+                                'Collect in a compost bin or container',
+                                'Avoid mixing with non-biodegradable items',
+                                'Use for home composting if possible',
+                                'Otherwise dispose in municipal organic waste bin'
+                            ];
+                        } else if (fileName.includes('glass')) {
+                            wasteType = 'Glass Container';
+                            disposalSteps = [
+                                'Rinse thoroughly to remove residue',
+                                'Remove lids and caps (often different material)',
+                                'Separate by color if required by local facility',
+                                'Place in glass recycling bin or take to collection point'
+                            ];
+                        } else if (fileName.includes('metal') || fileName.includes('can')) {
+                            wasteType = 'Metal Can';
+                            disposalSteps = [
+                                'Rinse cans to remove food residue',
+                                'Flatten aluminum cans if possible',
+                                'Remove paper labels from cans',
+                                'Place in metal recycling bin'
+                            ];
+                        } else if (fileName.includes('electronic') || fileName.includes('device')) {
+                            wasteType = 'Electronic Device';
+                            disposalSteps = [
+                                'Remove batteries if possible',
+                                'Wipe personal data from devices',
+                                'Take to e-waste recycling centers',
+                                'Many retailers offer trade-in or recycling programs'
+                            ];
+                        }
+                        
+                        document.getElementById('wasteType').textContent = wasteType;
+                        const stepsList = document.querySelector('#disposalSteps ol');
+                        stepsList.innerHTML = disposalSteps.map(step => `<li>${step}</li>`).join('');
+                        
+                        // Show collection request button if user is logged in
+                        if (currentUser) {
+                            document.getElementById('requestCollectionBtn').style.display = 'block';
+                        } else {
+                            document.getElementById('requestCollectionBtn').style.display = 'none';
+                        }
+                    }, 1500);
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        // Feedback form submission - Updated to use PHP API
+        contactForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const name = document.getElementById('name');
+            const email = document.getElementById('email');
+            const subject = document.getElementById('subject');
+            const message = document.getElementById('message');
+            
+            // Basic validation
+            if (!name.value || !email.value || !subject.value || !message.value) {
+                showNotification('Please fill all fields', 'error');
+                return;
+            }
+            
+            if (!email.value.includes('@')) {
+                showNotification('Please enter a valid email', 'error');
+                return;
+            }
+            
+            try {
+                const response = await fetch('api.php/api/feedback', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        name: name.value,
+                        email: email.value,
+                        subject: subject.value,
+                        message: message.value
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    showNotification('Thank you for your feedback! We will get back to you soon.', 'success');
+                    contactForm.reset();
+                } else {
+                    showNotification('Failed to submit feedback. Please try again.', 'error');
+                }
+            } catch (error) {
+                console.error('Feedback submission error:', error);
+                showNotification('Failed to submit feedback. Please try again.', 'error');
+            }
+        });
+        
+        // Smooth scrolling for navigation links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function(e) {
+                e.preventDefault();
+                
+                const targetId = this.getAttribute('href');
+                if (targetId === '#') return;
+                
+                const targetElement = document.querySelector(targetId);
+                if (targetElement) {
+                    window.scrollTo({
+                        top: targetElement.offsetTop - 80,
+                        behavior: 'smooth'
+                    });
+                }
+            });
+        });
+
+        // Check if user is already logged in
+        document.addEventListener('DOMContentLoaded', () => {
+            const savedUser = localStorage.getItem('ecobin-current-user');
+            const savedCollector = localStorage.getItem('ecobin-current-collector');
+            
+            if (savedUser) {
+                currentUser = JSON.parse(savedUser);
+                updateUI();
+            } else if (savedCollector) {
+                currentCollector = JSON.parse(savedCollector);
+                updateUI();
+            }
+        });
+    </script>
+</body>
+</html>
